@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NextAuto | Compra y vende tu carro en Bogotá</title>
+  <meta name="description" content="Compra carros usados seleccionados en Bogotá o vende el tuyo y recibe una oferta por WhatsApp. Financiación y trámites de tránsito.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="saltar" href="#autos">Saltar al inventario</a>
+
+  <!-- ============ ENCABEZADO ============ -->
+  <header class="header" id="top">
+    <div class="header__inner">
+      <a class="logo" href="#top">
+        <img class="logo__img" src="img/logo.jpg" alt="" width="72" height="72">
+        <span class="logo__texto">NextAuto</span>
+      </a>
+      <nav class="nav" aria-label="Principal">
+        <a href="#autos">Comprar</a>
+        <a href="#inicio" data-abrir="vender">Vender</a>
+        <a href="#servicios">Servicios</a>
+        <a href="#nosotros">Nosotros</a>
+        <a href="#contacto">Contacto</a>
+      </nav>
+      <a class="header__wa" data-wa href="#contacto">WhatsApp</a>
+    </div>
+  </header>
+
+  <!-- ============ MARCAS DISPONIBLES (banda que se desliza) ============ -->
+  <div class="marcas-ticker" aria-label="Marcas disponibles">
+    <div class="marcas-ticker__pista" id="marcas-ticker"></div>
+  </div>
+
+  <main>
+    <!-- ============ INVENTARIO (primero lo que hay para comprar) ============ -->
+    <section class="seccion contenedor" id="autos">
+      <div class="seccion__cab">
+        <h2>Autos disponibles</h2>
+        <p class="conteo" id="conteo" aria-live="polite"></p>
+      </div>
+
+      <div class="catalogo">
+        <details class="filtros" id="filtros" open>
+          <summary id="filtros-resumen">Filtros</summary>
+          <div class="filtros__cuerpo">
+            <fieldset class="grupo">
+              <legend>Marca</legend>
+              <div id="lista-marcas" class="marcas"></div>
+            </fieldset>
+            <div class="grupo campo">
+              <label for="f-precio">Precio máximo</label>
+              <select id="f-precio"></select>
+            </div>
+            <div class="grupo campo">
+              <label for="f-orden">Ordenar por</label>
+              <select id="f-orden">
+                <option value="precio-desc">Mayor precio</option>
+                <option value="precio-asc">Menor precio</option>
+                <option value="descuento">Mayor descuento</option>
+                <option value="anio-desc">Más nuevos</option>
+                <option value="km-asc">Menor kilometraje</option>
+              </select>
+            </div>
+            <button class="btn-texto" type="button" id="limpiar">Limpiar filtros</button>
+          </div>
+        </details>
+
+        <div id="lista-autos" class="autos"></div>
+      </div>
+    </section>
+
+    <!-- ============ COMPRAR O VENDER (más abajo) ============ -->
+    <section class="hero" id="inicio">
+      <div class="hero__inner">
+        <div class="hero__texto">
+          <h1>Compra o vende tu carro sin vueltas</h1>
+          <p class="hero__sub">
+            Usados seleccionados en Bogotá, financiación y acompañamiento en todo el proceso.
+            Y si quieres vender el tuyo, te hacemos una oferta por WhatsApp.
+          </p>
+          <ul class="hero__puntos">
+            <li>Usados cuidadosamente seleccionados</li>
+            <li>Financiación y trámites de tránsito</li>
+            <li>Compramos tu carro o lo recibimos en consignación</li>
+          </ul>
+        </div>
+
+        <div class="panel" id="panel">
+          <div class="tabs" role="tablist" aria-label="¿Qué quieres hacer?">
+            <button class="tab" role="tab" type="button" id="tab-comprar" aria-controls="panel-comprar" aria-selected="true">Quiero comprar</button>
+            <button class="tab" role="tab" type="button" id="tab-vender" aria-controls="panel-vender" aria-selected="false" tabindex="-1">Quiero vender</button>
+          </div>
+
+          <!-- Comprar -->
+          <div role="tabpanel" id="panel-comprar" aria-labelledby="tab-comprar">
+            <form id="form-comprar" class="form">
+              <h2 class="panel__titulo">Encuentra tu próximo carro</h2>
+              <div class="campo">
+                <label for="c-marca">Marca</label>
+                <select id="c-marca" name="marca"></select>
+              </div>
+              <div class="campo">
+                <label for="c-precio">Presupuesto máximo</label>
+                <select id="c-precio" name="precio"></select>
+              </div>
+              <button class="btn btn--amarillo btn--bloque" type="submit">Ver autos disponibles</button>
+              <p class="form__ayuda">
+                ¿No ves el que buscas?
+                <a data-wa data-wa-text="Hola, estoy buscando un carro y no lo encontré en su página." href="#contacto">Cuéntanos por WhatsApp</a>.
+              </p>
+            </form>
+          </div>
+
+          <!-- Vender -->
+          <div role="tabpanel" id="panel-vender" aria-labelledby="tab-vender" hidden>
+            <form id="form-vender" class="form form--vender">
+              <h2 class="panel__titulo campo--ancho">Recibe una oferta por tu carro</h2>
+              <div class="campo">
+                <label for="v-marca">Marca</label>
+                <input id="v-marca" name="marca" type="text" list="marcas-comunes" autocomplete="off" required>
+                <datalist id="marcas-comunes">
+                  <option value="Audi"><option value="BMW"><option value="BYD"><option value="Chery">
+                  <option value="Chevrolet"><option value="Ford"><option value="Hyundai"><option value="Kia">
+                  <option value="Mazda"><option value="Mercedes-Benz"><option value="Nissan"><option value="Renault">
+                  <option value="Suzuki"><option value="Toyota"><option value="Volkswagen">
+                </datalist>
+              </div>
+              <div class="campo">
+                <label for="v-modelo">Modelo</label>
+                <input id="v-modelo" name="modelo" type="text" placeholder="Ej: Onix" required>
+              </div>
+              <div class="campo">
+                <label for="v-anio">Año</label>
+                <input id="v-anio" name="anio" type="number" inputmode="numeric" min="1980" placeholder="Ej: 2020" required>
+              </div>
+              <div class="campo">
+                <label for="v-km">Kilometraje</label>
+                <input id="v-km" name="km" type="number" inputmode="numeric" min="0" placeholder="Ej: 45000" required>
+              </div>
+              <div class="campo campo--ancho">
+                <label for="v-precio">Precio que esperas (opcional)</label>
+                <input id="v-precio" name="precio" type="number" inputmode="numeric" min="0" placeholder="Ej: 65000000">
+              </div>
+              <div class="campo campo--ancho">
+                <label for="v-whatsapp">Tu WhatsApp</label>
+                <input id="v-whatsapp" name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" placeholder="Ej: 300 123 4567" required>
+              </div>
+              <button class="btn btn--wa btn--bloque" type="submit">Solicitar oferta por WhatsApp</button>
+              <p class="form__ayuda form__estado" id="venta-estado" role="status" aria-live="polite">
+                Se abrirá WhatsApp con los datos de tu carro listos para enviar.
+              </p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CÓMO FUNCIONA ============ -->
+    <section class="seccion contenedor" id="como-funciona">
+      <h2>Así compras y vendes con nosotros</h2>
+      <div class="caminos">
+        <div class="camino">
+          <h3>Si quieres comprar</h3>
+          <ol class="pasos">
+            <li><strong>Elige tu carro</strong><span>Filtra el inventario por marca y presupuesto.</span></li>
+            <li><strong>Escríbenos</strong><span>Pregunta por WhatsApp desde el mismo carro que te gustó.</span></li>
+            <li><strong>Cierra el trato</strong><span>Te ayudamos con la financiación y los trámites de tránsito.</span></li>
+          </ol>
+          <a class="btn btn--azul" href="#autos">Ver autos disponibles</a>
+        </div>
+
+        <div class="camino">
+          <h3>Si quieres vender</h3>
+          <ol class="pasos">
+            <li><strong>Cuéntanos de tu carro</strong><span>Marca, modelo, año y kilometraje. Toma un minuto.</span></li>
+            <li><strong>Recibe una oferta</strong><span>Te respondemos por WhatsApp con una propuesta de compra.</span></li>
+            <li><strong>Cierra y listo</strong><span>Si aceptas, coordinamos la revisión y el traspaso. También puedes dejarlo en consignación.</span></li>
+          </ol>
+          <a class="btn btn--amarillo" href="#inicio" data-abrir="vender">Vender mi carro</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ BANDA: VENDER ============ -->
+    <section class="banda">
+      <div class="banda__inner">
+        <div>
+          <h2>¿Tienes un carro para vender?</h2>
+          <p>Cuéntanos marca, modelo y kilometraje y te respondemos con una oferta por WhatsApp.</p>
+        </div>
+        <a class="btn btn--oscuro" href="#inicio" data-abrir="vender">Vender mi carro</a>
+      </div>
+    </section>
+
+    <!-- ============ SERVICIOS Y NOSOTROS ============ -->
+    <section class="seccion contenedor dos-col">
+      <div id="servicios">
+        <h2>Servicios</h2>
+        <ul class="servicios">
+          <li><strong>Financiación</strong><span>Te ayudamos a armar el crédito para tu carro.</span></li>
+          <li><strong>Compra y venta</strong><span>Compramos tu carro o te ayudamos a encontrar el siguiente.</span></li>
+          <li><strong>Consignación</strong><span>Dejas tu carro con nosotros y lo vendemos por ti.</span></li>
+          <li><strong>Peritaje</strong><span>Revisamos el estado del carro antes de cerrar el trato.</span></li>
+          <li><strong>Trámites de tránsito</strong><span>Traspaso y papeles al día.</span></li>
+        </ul>
+      </div>
+      <div id="nosotros">
+        <h2>Sobre nosotros</h2>
+        <p class="texto">
+          Somos un concesionario ubicado en Bogotá especializado en carros usados cuidadosamente seleccionados.
+          Te acompañamos tanto si vas a comprar como si vas a vender.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ CONTACTO ============ -->
+    <section class="contacto" id="contacto">
+      <div class="contacto__inner">
+        <div>
+          <h2>Escríbenos</h2>
+          <p>Respondemos por WhatsApp. Cuéntanos qué carro buscas o cuál quieres vender.</p>
+          <ul class="contacto__datos">
+            <li>WhatsApp: <span data-config="whatsappVisible"></span></li>
+            <li>Email: <a data-email href="#contacto"></a></li>
+            <li>Dirección: Bogotá, Colombia</li>
+          </ul>
+        </div>
+        <a class="btn btn--wa" data-wa href="#contacto">Escribir por WhatsApp</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>© <span id="anio-actual">2026</span> NextAuto. Todos los derechos reservados.</p>
+  </footer>
+
+  <script src="autos.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
