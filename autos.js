@@ -2,8 +2,8 @@
 // CONFIGURACIÓN DEL NEGOCIO
 // Cambia estos datos una sola vez y se actualizan en toda la página.
 const CONFIG = {
-  whatsapp: '573212637612',            // Número con indicativo de país, sin + ni espacios
-  whatsappVisible: '+57 321 263 7612', // Como se muestra en pantalla
+  whatsapp: '573106811104',            // Número con indicativo de país, sin + ni espacios
+  whatsappVisible: '+57 310 681 1104', // Como se muestra en pantalla
   email: 'contacto@tusitio.com',
 
   // Opcional: URL de tu Google Apps Script para guardar cada solicitud de
