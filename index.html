@@ -8,8 +8,10 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#0f233c">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="musica.css">
 </head>
 <body>
   <a class="saltar" href="#autos">Saltar al inventario</a>
@@ -23,7 +25,7 @@
       </a>
       <nav class="nav" aria-label="Principal">
         <a href="#autos">Comprar</a>
-        <a href="#inicio" data-abrir="vender">Vender</a>
+        <a href="#compra-venta" data-abrir="vender">Vender</a>
         <a href="#servicios">Servicios</a>
         <a href="#nosotros">Nosotros</a>
         <a href="#contacto">Contacto</a>
@@ -32,16 +34,48 @@
     </div>
   </header>
 
-  <!-- ============ MARCAS DISPONIBLES (banda que se desliza) ============ -->
-  <div class="marcas-ticker" aria-label="Marcas disponibles">
-    <div class="marcas-ticker__pista" id="marcas-ticker"></div>
-  </div>
-
   <main>
-    <!-- ============ INVENTARIO (primero lo que hay para comprar) ============ -->
-    <section class="seccion contenedor" id="autos">
+    <!-- ============ INICIO: HERO CON VIDEO DE FONDO ============ -->
+    <section class="hero" id="inicio" aria-labelledby="hero-titulo">
+      <!-- Pon tu video en video/hero.mp4 (ver video/LEEME.txt). Sin archivo, se ve el fondo azul. -->
+      <video class="hero__video" id="hero-video" autoplay muted loop playsinline preload="metadata"
+             poster="img/hero-poster.jpg" aria-hidden="true" tabindex="-1">
+        <source src="video/hero.mp4" type="video/mp4">
+      </video>
+      <div class="hero__velo"></div>
+
+      <div class="hero__inner">
+        <h1 id="hero-titulo">
+          <span class="hero__l1">Compra o vende</span>
+          <span class="hero__l2">tu carro sin vueltas</span>
+        </h1>
+        <p class="hero__sub">
+          Usados seleccionados en Bogotá, con financiación y trámites de tránsito.
+          Si quieres vender el tuyo, te hacemos una oferta por WhatsApp.
+        </p>
+        <div class="hero__acciones">
+          <a class="btn-hero btn-hero--lleno" href="#autos">Ver los carros</a>
+          <a class="btn-hero btn-hero--borde" href="#compra-venta" data-abrir="vender">Vender mi carro</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ MARCAS (justo debajo del hero) ============ -->
+    <section class="marcas-sec" id="marcas" aria-labelledby="marcas-titulo">
+      <div class="marcas-sec__cab">
+        <h2 id="marcas-titulo">Busca por marca</h2>
+        <p class="marcas-sec__ayuda">Toca una marca para ver sus autos</p>
+      </div>
+      <div class="marcas-ticker" aria-label="Marcas disponibles">
+        <div class="marcas-ticker__pista" id="marcas-ticker"></div>
+      </div>
+    </section>
+
+    <!-- ============ INVENTARIO (vitrina) ============ -->
+    <section class="vitrina" id="autos" aria-labelledby="autos-titulo">
+     <div class="vitrina__inner">
       <div class="seccion__cab">
-        <h2>Autos disponibles</h2>
+        <h2 id="autos-titulo">Autos disponibles</h2>
         <p class="conteo" id="conteo" aria-live="polite"></p>
       </div>
 
@@ -73,22 +107,39 @@
 
         <div id="lista-autos" class="autos"></div>
       </div>
+     </div>
     </section>
 
-    <!-- ============ COMPRAR O VENDER (más abajo) ============ -->
-    <section class="hero" id="inicio">
-      <div class="hero__inner">
-        <div class="hero__texto">
-          <h1>Compra o vende tu carro sin vueltas</h1>
-          <p class="hero__sub">
-            Usados seleccionados en Bogotá, financiación y acompañamiento en todo el proceso.
-            Y si quieres vender el tuyo, te hacemos una oferta por WhatsApp.
-          </p>
-          <ul class="hero__puntos">
-            <li>Usados cuidadosamente seleccionados</li>
-            <li>Financiación y trámites de tránsito</li>
-            <li>Compramos tu carro o lo recibimos en consignación</li>
-          </ul>
+    <!-- ============ COMPRAR O VENDER (después del inventario) ============ -->
+    <section class="tramite" id="compra-venta">
+      <div class="tramite__inner">
+        <div class="tramite__texto">
+          <div data-texto="comprar">
+            <h2>Encuentra el tuyo o vende el que tienes</h2>
+            <p class="tramite__sub">
+              Dinos tu presupuesto y filtramos el inventario, o cuéntanos de tu carro
+              y te ayudamos a venderlo.
+            </p>
+            <ul class="tramite__puntos">
+              <li>Usados cuidadosamente seleccionados</li>
+              <li>Financiación y trámites de tránsito</li>
+              <li>Te acompañamos si quieres vender tu carro</li>
+            </ul>
+          </div>
+
+          <div data-texto="vender" hidden>
+            <h2>Vende tu carro sin pagar nada por adelantado</h2>
+            <p class="tramite__sub">
+              Nos encargamos de todo el proceso, desde las fotos hasta el traspaso.
+              Tú te quedas con tu carro hasta que haya un comprador.
+            </p>
+            <ul class="tramite__puntos">
+              <li>Sin costo inicial: fotos, publicación y promoción van por nuestra cuenta</li>
+              <li>Comisión del 5 % del valor de la venta, solo si logramos venderlo</li>
+              <li>Tu carro no se entrega en consignación</li>
+            </ul>
+            <a class="tramite__enlace" href="#proceso-venta">Ver el proceso completo paso a paso</a>
+          </div>
         </div>
 
         <div class="panel" id="panel">
@@ -120,7 +171,7 @@
           <!-- Vender -->
           <div role="tabpanel" id="panel-vender" aria-labelledby="tab-vender" hidden>
             <form id="form-vender" class="form form--vender">
-              <h2 class="panel__titulo campo--ancho">Recibe una oferta por tu carro</h2>
+              <h2 class="panel__titulo campo--ancho">Cuéntanos de tu carro</h2>
               <div class="campo">
                 <label for="v-marca">Marca</label>
                 <input id="v-marca" name="marca" type="text" list="marcas-comunes" autocomplete="off" required>
@@ -151,12 +202,93 @@
                 <label for="v-whatsapp">Tu WhatsApp</label>
                 <input id="v-whatsapp" name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" placeholder="Ej: 321 263 7612" required>
               </div>
-              <button class="btn btn--wa btn--bloque" type="submit">Solicitar oferta por WhatsApp</button>
+              <button class="btn btn--wa btn--bloque" type="submit">Quiero vender por WhatsApp</button>
               <p class="form__ayuda form__estado" id="venta-estado" role="status" aria-live="polite">
                 Se abrirá WhatsApp con los datos de tu carro listos para enviar.
               </p>
             </form>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PROCESO DE VENTA DETALLADO ============ -->
+    <section class="proceso" id="proceso-venta" aria-labelledby="proceso-titulo">
+      <div class="proceso__inner">
+       <div class="proceso__fila">
+        <div class="proceso__intro">
+          <h2 id="proceso-titulo">Así vendemos tu carro</h2>
+          <p>
+            NextAuto te acompaña desde las fotos hasta la firma. Tu carro sigue contigo
+            y solo pagas si la venta se concreta.
+          </p>
+          <a class="btn btn--amarillo" href="#compra-venta" data-abrir="vender">Quiero vender mi carro</a>
+        </div>
+
+        <ol class="linea">
+          <li class="paso">
+            <h3>Fotos y video profesionales</h3>
+            <p>Tomamos fotografías profesionales de tu carro y creamos videos y material audiovisual. Con material de calidad, tu carro destaca desde el primer anuncio.</p>
+          </li>
+          <li class="paso">
+            <h3>Estudio de mercado</h3>
+            <p>Analizamos el mercado para definir el precio adecuado y conseguir el mejor valor en el menor tiempo posible.</p>
+          </li>
+          <li class="paso">
+            <h3>Publicidad y promoción</h3>
+            <p>Creamos y publicamos los anuncios, hacemos campañas y promociones, y buscamos al cliente ideal para tu carro.</p>
+          </li>
+          <li class="paso">
+            <h3>Citas con compradores</h3>
+            <p>Nosotros coordinamos las citas con los interesados. Las visitas se hacen en un lugar seguro y cómodo para ti:</p>
+            <ul class="fichas">
+              <li>Tu conjunto residencial</li>
+              <li>Tu casa</li>
+            </ul>
+          </li>
+          <li class="paso">
+            <h3>Negociación</h3>
+            <p>Te acompañamos durante la negociación con el comprador y te apoyamos para cerrar el negocio.</p>
+          </li>
+          <li class="paso">
+            <h3>Peritaje</h3>
+            <p>Normalmente se hace en sitios reconocidos y especializados:</p>
+            <ul class="fichas">
+              <li>Coseautos</li>
+              <li>Automas</li>
+            </ul>
+            <p>Para carros de alta gama también puede hacerse directamente en concesionarios especializados:</p>
+            <ul class="fichas">
+              <li>Auto Germana (BMW)</li>
+              <li>Star Niza (Mercedes-Benz)</li>
+            </ul>
+          </li>
+          <li class="paso">
+            <h3>Trámites y documentación</h3>
+            <p>Un tramitador se encarga de las improntas, el papeleo y los trámites necesarios para finalizar la venta.</p>
+          </li>
+        </ol>
+       </div>
+
+        <div class="proceso__cuentas">
+          <article class="cuenta">
+            <h3>Tu carro siempre contigo</h3>
+            <ul class="cuenta__lista">
+              <li>Permanece en tu poder durante todo el proceso.</li>
+              <li>No es necesario entregarlo en consignación.</li>
+              <li>Solo sale al final de la negociación, para el peritaje.</li>
+            </ul>
+          </article>
+
+          <article class="cuenta cuenta--precio">
+            <h3>Cuánto cuesta</h3>
+            <ul class="cuenta__lista">
+              <li>Se cobra una comisión del 5 % sobre el valor de venta del vehículo</li>
+              <li>La comisión se cobra solo si la venta se concreta por medio de NextAuto, con factura electrónica.</li>
+              <li>No pagas nada al inicio: ni por las fotos, ni por empezar, ni por la publicación y promoción.</li>
+              <li>Si vendes por tu cuenta antes de que consigamos al comprador, no hay penalidad, comisión ni saldo a favor de NextAuto.</li>
+            </ul>
+          </article>
         </div>
       </div>
     </section>
@@ -179,22 +311,11 @@
           <h3>Si quieres vender</h3>
           <ol class="pasos">
             <li><strong>Cuéntanos de tu carro</strong><span>Marca, modelo, año y kilometraje. Toma un minuto.</span></li>
-            <li><strong>Recibe una oferta</strong><span>Te respondemos por WhatsApp con una propuesta de compra.</span></li>
-            <li><strong>Cierra y listo</strong><span>Si aceptas, coordinamos la revisión y el traspaso. También puedes dejarlo en consignación.</span></li>
+            <li><strong>Nosotros lo promocionamos</strong><span>Fotos, precio de mercado, anuncios y citas con compradores, con tu carro en casa.</span></li>
+            <li><strong>Cerramos la venta</strong><span>Negociación, peritaje y trámites. Pagas el 5 % solo si se vende. <a href="#proceso-venta">Ver el proceso completo</a>.</span></li>
           </ol>
-          <a class="btn btn--amarillo" href="#inicio" data-abrir="vender">Vender mi carro</a>
+          <a class="btn btn--amarillo" href="#compra-venta" data-abrir="vender">Vender mi carro</a>
         </div>
-      </div>
-    </section>
-
-    <!-- ============ BANDA: VENDER ============ -->
-    <section class="banda">
-      <div class="banda__inner">
-        <div>
-          <h2>¿Tienes un carro para vender?</h2>
-          <p>Cuéntanos marca, modelo y kilometraje y te respondemos con una oferta por WhatsApp.</p>
-        </div>
-        <a class="btn btn--oscuro" href="#inicio" data-abrir="vender">Vender mi carro</a>
       </div>
     </section>
 
@@ -205,7 +326,6 @@
         <ul class="servicios">
           <li><strong>Financiación</strong><span>Te ayudamos a armar el crédito para tu carro.</span></li>
           <li><strong>Compra y venta</strong><span>Compramos tu carro o te ayudamos a encontrar el siguiente.</span></li>
-          <li><strong>Consignación</strong><span>Dejas tu carro con nosotros y lo vendemos por ti.</span></li>
           <li><strong>Peritaje</strong><span>Revisamos el estado del carro antes de cerrar el trato.</span></li>
           <li><strong>Trámites de tránsito</strong><span>Traspaso y papeles al día.</span></li>
         </ul>
@@ -216,6 +336,39 @@
           Somos un concesionario ubicado en Bogotá especializado en carros usados cuidadosamente seleccionados.
           Te acompañamos tanto si vas a comprar como si vas a vender.
         </p>
+      </div>
+    </section>
+
+    <!-- ============ RESEÑAS ============ -->
+    <section class="resenas" id="resenas" aria-labelledby="resenas-titulo">
+      <div class="resenas__inner">
+        <div class="resenas__cab">
+          <h2 id="resenas-titulo">Lo que dicen nuestros clientes</h2>
+          <p class="resenas__resumen" id="resenas-resumen" aria-live="polite"></p>
+          <a class="btn btn--amarillo" href="#resenas-form">Escribir una reseña</a>
+        </div>
+        <div class="resenas__lista" id="resenas-lista"></div>
+
+        <form class="resenas__form" id="resenas-form">
+          <h3>Publicar una reseña</h3>
+          <div class="campo"><label for="r-nombre">Nombre</label>
+            <input id="r-nombre" type="text" maxlength="60" placeholder="Ej: Ana P." required></div>
+          <fieldset class="estrellas-input">
+            <legend>Calificación</legend>
+            <input type="radio" name="r-estrellas" id="e5" value="5" required><label for="e5" title="5 estrellas">★<span class="solo-lector">5 estrellas</span></label>
+            <input type="radio" name="r-estrellas" id="e4" value="4"><label for="e4" title="4 estrellas">★<span class="solo-lector">4 estrellas</span></label>
+            <input type="radio" name="r-estrellas" id="e3" value="3"><label for="e3" title="3 estrellas">★<span class="solo-lector">3 estrellas</span></label>
+            <input type="radio" name="r-estrellas" id="e2" value="2"><label for="e2" title="2 estrellas">★<span class="solo-lector">2 estrellas</span></label>
+            <input type="radio" name="r-estrellas" id="e1" value="1"><label for="e1" title="1 estrella">★<span class="solo-lector">1 estrella</span></label>
+          </fieldset>
+          <div class="campo"><label for="r-texto">Reseña</label>
+            <textarea id="r-texto" rows="4" minlength="10" maxlength="600" placeholder="Cuenta tu experiencia" required></textarea></div>
+          <div class="campo"><label for="r-foto">Foto (opcional)</label>
+            <input id="r-foto" type="file" accept="image/*"></div>
+          <img class="resenas__previa" id="r-previa" alt="Vista previa de la foto" hidden>
+          <button class="btn btn--amarillo" type="submit">Publicar reseña</button>
+          <p class="form__ayuda" id="r-estado" role="status" aria-live="polite"></p>
+        </form>
       </div>
     </section>
 
@@ -241,6 +394,13 @@
   </footer>
 
   <script src="autos.js"></script>
+  <script src="resenas.js"></script>
   <script src="main.js"></script>
+  <script src="musica.js"></script>
+  
+
+<audio id="musicaPremium" autoplay loop preload="auto">
+  <source src="./musica/musica-premium.mp3" type="audio/mpeg">
+</audio>
 </body>
 </html>

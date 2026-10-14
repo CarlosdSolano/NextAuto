@@ -27,17 +27,6 @@ function porcentajeDescuento(auto) {
   return auto.original > auto.precio ? Math.round((1 - auto.precio / auto.original) * 100) : 0;
 }
 
-// Recuadro que se muestra cuando la foto del carro no existe
-const FOTO_PENDIENTE = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480">
-  <rect width="640" height="480" fill="#e3eaf6"/>
-  <path d="M212 262l38-56q10-14 28-14h84q18 0 28 14l38 56z" fill="#a9bbdb"/>
-  <rect x="120" y="246" width="400" height="76" rx="26" fill="#94a9cf"/>
-  <circle cx="212" cy="326" r="36" fill="#5c76a3"/><circle cx="212" cy="326" r="14" fill="#e3eaf6"/>
-  <circle cx="428" cy="326" r="36" fill="#5c76a3"/><circle cx="428" cy="326" r="14" fill="#e3eaf6"/>
-  <text x="320" y="410" text-anchor="middle" font-family="sans-serif" font-size="26" fill="#5c76a3">Foto próximamente</text>
-</svg>`);
-
 // Nombre de archivo esperado para el logo de cada marca en img/marcas/
 // (ej. "Mercedes-Benz" -> img/marcas/mercedes-benz.png). Si el archivo no existe,
 // se muestra automáticamente un escudo con las iniciales de la marca.
@@ -154,33 +143,83 @@ function sincronizarControles() {
 
 // ========================================
 // TARJETAS DE AUTOS
+// Un auto puede traer varias fotos en "fotos"; si solo tiene "img", se usa esa
+function fotosDe(auto) {
+  return Array.isArray(auto.fotos) && auto.fotos.length ? auto.fotos : [auto.img];
+}
+
 function plantillaAuto(auto) {
+  const fotos = fotosDe(auto);
+  const varias = fotos.length > 1;
   const nombre = `${auto.marca} ${auto.modelo} ${auto.anio}`;
   const descuento = porcentajeDescuento(auto);
   const mensaje = `Hola, quiero información del ${nombre} de ${formatoCOP.format(auto.precio)}.`;
 
   return `
-    <article class="auto">
+    <article class="auto" data-marca="${escaparHTML(auto.marca)}">
       <div class="auto__foto">
-        ${descuento ? `<span class="auto__descuento">-${descuento}%</span>` : ''}
-        <img src="${escaparHTML(auto.img)}" alt="${escaparHTML(nombre)}" width="640" height="480" loading="lazy">
-      </div>
-      <div class="auto__cuerpo">
-        <h3 class="auto__nombre">${escaparHTML(auto.marca)} ${escaparHTML(auto.modelo)}</h3>
+        <div class="auto__galeria${varias ? '' : ' auto__galeria--una'}">
+          ${fotos.map((src, i) => `<img class="auto__img" src="${escaparHTML(src)}" alt="${escaparHTML(nombre)}${varias ? `, foto ${i + 1} de ${fotos.length}` : ''}" width="640" height="480" loading="lazy">`).join('')}
+        </div>
+        ${varias ? `
+        <button class="auto__flecha auto__flecha--ant" type="button" data-foto="-1" aria-label="Foto anterior de ${escaparHTML(nombre)}"></button>
+        <button class="auto__flecha auto__flecha--sig" type="button" data-foto="1" aria-label="Foto siguiente de ${escaparHTML(nombre)}"></button>
+        <span class="auto__contador" aria-hidden="true">1 / ${fotos.length}</span>` : ''}
+        ${descuento ? `<span class="auto__cinta">-${descuento}%</span>` : ''}
+        <img class="auto__marca" src="img/marcas/${slugMarca(auto.marca)}.png" alt="" width="46" height="46" loading="lazy">
         <ul class="auto__datos">
           <li>${auto.anio}</li>
           <li>${formatoNum.format(auto.km)} km</li>
           <li>Bogotá</li>
         </ul>
+      </div>
+      <div class="auto__cuerpo">
+        <h3 class="auto__nombre"><span>${escaparHTML(auto.marca)}</span> ${escaparHTML(auto.modelo)}</h3>
         <p class="auto__precio">
           ${formatoCOP.format(auto.precio)}
           ${descuento ? `<s><span class="sr-only">Antes </span>${formatoCOP.format(auto.original)}</s>` : ''}
         </p>
-        <a class="btn btn--wa btn--bloque" href="${linkWhatsApp(mensaje)}" target="_blank" rel="noopener">
-          Preguntar por WhatsApp
-        </a>
+        <div class="auto__acciones">
+          <button class="btn btn--detalle" type="button" data-ver-auto aria-label="Ver detalle del ${escaparHTML(nombre)}">Ver detalle</button>
+          <a class="btn btn--wa" href="${linkWhatsApp(mensaje)}" target="_blank" rel="noopener">WhatsApp</a>
+        </div>
       </div>
     </article>`;
+}
+
+// Galería de fotos de una tarjeta: flechas, deslizar con el dedo y contador
+function iniciarGaleria(tarjeta, foto) {
+  const galeria = $('.auto__galeria', tarjeta);
+  const contador = $('.auto__contador', tarjeta);
+  const anterior = $('[data-foto="-1"]', tarjeta);
+  const siguiente = $('[data-foto="1"]', tarjeta);
+
+  const actualizar = () => {
+    const fotos = $$('.auto__img', galeria);
+    if (!fotos.length) { foto.classList.add('auto__foto--sin'); return; }
+    if (!contador) return;
+    const i = Math.min(fotos.length - 1, Math.round(galeria.scrollLeft / (galeria.clientWidth || 1)));
+    contador.textContent = `${i + 1} / ${fotos.length}`;
+    anterior.disabled = i === 0;
+    siguiente.disabled = i === fotos.length - 1;
+    // Con una sola foto que cargó, ya no hace falta navegar
+    [anterior, siguiente, contador].forEach(el => { el.hidden = fotos.length < 2; });
+  };
+
+  // Si una foto no existe, se quita; si ninguna carga, se muestra el escudo de la marca
+  $$('.auto__img', galeria).forEach(img =>
+    img.addEventListener('error', () => { img.remove(); actualizar(); }, { once: true })
+  );
+
+  if (contador) {
+    galeria.addEventListener('scroll', () => requestAnimationFrame(actualizar), { passive: true });
+    tarjeta.addEventListener('click', e => {
+      const boton = e.target.closest('[data-foto]');
+      if (!boton) return;
+      galeria.scrollBy({ left: Number(boton.dataset.foto) * galeria.clientWidth, behavior: comportamiento });
+    });
+    actualizar();
+  }
 }
 
 function plantillaVacio() {
@@ -196,8 +235,11 @@ function plantillaVacio() {
     </div>`;
 }
 
+let autosMostrados = [];
+
 function renderAutos() {
   const lista = autosFiltrados();
+  autosMostrados = lista;
   const contenedor = $('#lista-autos');
 
   contenedor.innerHTML = lista.length ? lista.map(plantillaAuto).join('') : plantillaVacio();
@@ -205,10 +247,14 @@ function renderAutos() {
     ? `${autos.length} ${autos.length === 1 ? 'auto' : 'autos'}`
     : `Mostrando ${lista.length} de ${autos.length} autos`;
 
-  // Si la foto no existe, mostramos el recuadro en vez de un ícono roto
-  $$('img', contenedor).forEach(img =>
-    img.addEventListener('error', () => { img.src = FOTO_PENDIENTE; }, { once: true })
-  );
+  // Si la foto no existe, la tarjeta muestra el escudo de la marca en vez de un ícono roto
+  $$('.auto', contenedor).forEach(tarjeta => {
+    const foto = $('.auto__foto', tarjeta);
+    iniciarGaleria(tarjeta, foto);
+    // Si tampoco existe el logo de la marca, se usa el escudo con iniciales
+    const logo = $('.auto__marca', tarjeta);
+    logo.addEventListener('error', () => { logo.src = insigniaMarca(tarjeta.dataset.marca); }, { once: true });
+  });
 }
 
 function actualizar() {
@@ -223,7 +269,234 @@ function limpiarFiltros() {
 }
 
 // ========================================
-// PESTAÑAS DEL INICIO: COMPRAR / VENDER
+// DETALLE DEL AUTO A PANTALLA COMPLETA
+// Al seleccionar un carro se abre configurador.html dentro de un iframe (así su hoja de estilos
+// queda aislada de la del sitio) y se le envían los autos que se están viendo.
+let visorAbierto = null;
+
+function abrirVisor(indice, origen) {
+  if (visorAbierto || !autosMostrados[indice]) return;
+
+  const datos = autosMostrados.map(auto => {
+    const nombre = `${auto.marca} ${auto.modelo} ${auto.anio}`;
+    return {
+      marca: auto.marca, modelo: auto.modelo, anio: auto.anio, km: auto.km,
+      precio: auto.precio, descuento: porcentajeDescuento(auto),
+      foto: fotosDe(auto)[0],
+      fotos: fotosDe(auto),
+      modelo3d: auto.modelo3d || null,
+      giro360: auto.giro360 || null,
+      wa: linkWhatsApp(`Hola, quiero información del ${nombre} de ${formatoCOP.format(auto.precio)}.`)
+    };
+  });
+
+  const elegido = datos[indice];
+  const visor = document.createElement('div');
+  visor.className = 'visor';
+  visor.setAttribute('role', 'dialog');
+  visor.setAttribute('aria-modal', 'true');
+  visor.setAttribute('aria-label', `Detalle del ${elegido.marca} ${elegido.modelo} ${elegido.anio}`);
+  visor.innerHTML = `
+    <iframe class="visor__marco" src="configurador.html" title="Detalle del ${escaparHTML(elegido.marca)} ${escaparHTML(elegido.modelo)}"></iframe>
+    <button class="visor__cerrar" type="button" aria-label="Cerrar el detalle"></button>`;
+
+  // Lo de atrás no debe recibir foco ni lectura mientras el detalle está abierto
+  const bloqueados = Array.from(document.body.children).filter(el => el.tagName !== 'SCRIPT');
+  bloqueados.forEach(el => { el.inert = true; });
+  document.body.appendChild(visor);
+  document.body.classList.add('visor-abierto');
+
+  const marco = $('.visor__marco', visor);
+  const cerrar = $('.visor__cerrar', visor);
+
+  function cerrarVisor() {
+    window.removeEventListener('message', alRecibir);
+    document.removeEventListener('keydown', alTeclear);
+    visor.remove();
+    bloqueados.forEach(el => { el.inert = false; });
+    document.body.classList.remove('visor-abierto');
+    visorAbierto = null;
+    if (origen && origen.isConnected) origen.focus();
+  }
+  function alRecibir(e) {
+    if (e.source === marco.contentWindow && e.data && e.data.tipo === 'cerrar') cerrarVisor();
+  }
+  function alTeclear(e) { if (e.key === 'Escape') cerrarVisor(); }
+
+  marco.addEventListener('load', () => {
+    marco.contentWindow.postMessage({ tipo: 'init', autos: datos, inicio: indice }, '*');
+  });
+  window.addEventListener('message', alRecibir);
+  document.addEventListener('keydown', alTeclear);
+  cerrar.addEventListener('click', cerrarVisor);
+  cerrar.focus();
+  visorAbierto = visor;
+}
+
+function iniciarVisor() {
+  $('#lista-autos').addEventListener('click', e => {
+    const tarjeta = e.target.closest('.auto');
+    if (!tarjeta) return;
+    const boton = e.target.closest('[data-ver-auto]');
+    // También abre al tocar la foto (menos sus flechas)
+    const enFoto = e.target.closest('.auto__foto') && !e.target.closest('.auto__flecha');
+    if (!boton && !enFoto) return;
+    const indice = $$('.auto', $('#lista-autos')).indexOf(tarjeta);
+    abrirVisor(indice, boton || tarjeta.querySelector('[data-ver-auto]'));
+  });
+}
+
+// ========================================
+// HERO: VIDEO DE FONDO Y ENCABEZADO
+function iniciarHero() {
+  const hero = $('#inicio');
+  const video = $('#hero-video');
+  if (!hero || !video) return;
+
+  const sinVideo = () => hero.classList.add('hero--sin-video');
+
+  // Si el archivo no existe, se queda el fondo estático
+  const fuentes = $$('source', video);
+  fuentes[fuentes.length - 1]?.addEventListener('error', sinVideo);
+  video.addEventListener('error', sinVideo);
+  // El error puede haber ocurrido antes de poner los oyentes: se revisa también al terminar de cargar
+  const revisar = () => { if (video.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) sinVideo(); };
+  revisar();
+  window.addEventListener('load', revisar);
+
+  // Reproducción automática continua, sin controles ni pausas
+  video.muted = true;
+  video.defaultMuted = true;
+  video.loop = true;
+  video.setAttribute('autoplay', '');
+
+  const reproducir = () => { if (video.paused) video.play().catch(() => {}); };
+  reproducir();
+  video.addEventListener('loadeddata', reproducir);
+  video.addEventListener('canplay', reproducir);
+  video.addEventListener('pause', () => { if (!video.ended) reproducir(); }); // si algo lo pausa, continúa
+  window.addEventListener('load', reproducir);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) reproducir(); });
+  // Respaldo (p. ej. modo bajo consumo de iOS): arranca en la primera interacción
+  ['pointerdown', 'touchstart', 'keydown', 'click', 'scroll'].forEach(ev =>
+    window.addEventListener(ev, reproducir, { passive: true }));
+}
+
+
+// ========================================
+// RESEÑAS: lista pública + formulario visible para que los clientes publiquen directamente en la web
+function iniciarResenas() {
+  const lista = $('#resenas-lista'), form = $('#resenas-form');
+  if (!lista || !form) return;
+  const limitar = n => Math.max(1, Math.min(5, Math.round(Number(n) || 0)));
+  const estrellas = n => [1, 2, 3, 4, 5].map(i => `<span class="${i <= n ? 'on' : ''}" aria-hidden="true">★</span>`).join('');
+  let reseñasServidor = [];
+  const ejemplos = (typeof RESENAS !== 'undefined' ? RESENAS : []).filter(x => !/^Cliente de ejemplo/i.test(String(x.nombre || '')) && !/\bEjemplo:/i.test(String(x.texto || '')));
+
+  function pintar() {
+    const r = [...reseñasServidor, ...ejemplos].map(x => ({ ...x, estrellas: limitar(x.estrellas) }));
+    $('#resenas-resumen').textContent = r.length
+      ? `${(r.reduce((s, x) => s + x.estrellas, 0) / r.length).toFixed(1).replace('.', ',')} de 5 · ${r.length} ${r.length === 1 ? 'reseña' : 'reseñas'}`
+      : 'Aún no hay reseñas. ¡Sé el primero en dejar la tuya!';
+    lista.innerHTML = r.map(x => {
+      const nombre = String(x.nombre || 'Cliente');
+      const inicial = escaparHTML(nombre.trim().charAt(0).toUpperCase() || '?');
+      return `<article class="resena"><div class="resena__cab">
+        ${x.foto ? `<img class="resena__foto" src="${escaparHTML(x.foto)}" alt="Foto de ${escaparHTML(nombre)}" loading="lazy" width="64" height="64" data-inicial="${inicial}">` : `<span class="resena__foto resena__foto--inicial" aria-hidden="true">${inicial}</span>`}
+        <div><p class="resena__autor">${escaparHTML(nombre)}</p>${x.fecha ? `<p class="resena__fecha">${escaparHTML(x.fecha)}</p>` : ''}</div>
+        </div><p class="resena__estrellas" role="img" aria-label="${x.estrellas} de 5 estrellas">${estrellas(x.estrellas)}</p>
+        <p class="resena__texto">${escaparHTML(x.texto)}</p></article>`;
+    }).join('');
+    lista.querySelectorAll('img.resena__foto').forEach(img => img.addEventListener('error', () => {
+      const c = document.createElement('span'); c.className = 'resena__foto resena__foto--inicial';
+      c.setAttribute('aria-hidden', 'true'); c.textContent = img.dataset.inicial || '?'; img.replaceWith(c);
+    }, { once: true }));
+  }
+
+  async function cargarResenas() {
+    try {
+      const respuesta = await fetch('/api/reviews', { headers: { Accept: 'application/json' }, cache: 'no-store' });
+      if (!respuesta.ok) throw new Error('API no disponible');
+      const datos = await respuesta.json();
+      reseñasServidor = Array.isArray(datos.reviews) ? datos.reviews : [];
+    } catch (e) {
+      // La web puede abrirse como sitio estático; en ese caso el formulario informa que falta configurar la API.
+      reseñasServidor = [];
+    }
+    pintar();
+  }
+  pintar();
+  cargarResenas();
+
+  // El formulario está visible en la sección de reseñas; el enlace solo desplaza hasta él.
+  form.hidden = false;
+
+  // Honeypot: debe permanecer vacío. La validación real también se realiza en el servidor.
+  if (!form.querySelector('[name="website"]')) {
+    const trampa = document.createElement('div'); trampa.className = 'campo-captura';
+    trampa.setAttribute('aria-hidden', 'true'); trampa.style.cssText = 'position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden';
+    trampa.innerHTML = '<label for="r-website">No completar</label><input id="r-website" name="website" type="text" tabindex="-1" autocomplete="off">';
+    form.appendChild(trampa);
+  }
+
+  let fotoData = '';
+  const inputFoto = $('#r-foto');
+  if (inputFoto) inputFoto.addEventListener('change', e => {
+    fotoData = '';
+    const archivo = e.target.files && e.target.files[0];
+    const previa = $('#r-previa'); previa.hidden = true;
+    if (!archivo) return;
+    if (!archivo.type.startsWith('image/') || archivo.size > 5 * 1024 * 1024) {
+      $('#r-estado').textContent = 'Selecciona una imagen válida de máximo 5 MB.'; inputFoto.value = ''; return;
+    }
+    const img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, 600 / Math.max(img.width, img.height));
+      const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(img.width*k)); c.height = Math.max(1, Math.round(img.height*k));
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      fotoData = c.toDataURL('image/jpeg', 0.72); previa.src = fotoData; previa.hidden = false; URL.revokeObjectURL(img.src);
+    };
+    img.onerror = () => { $('#r-estado').textContent = 'No se pudo leer la imagen.'; };
+    img.src = URL.createObjectURL(archivo);
+  });
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const estadoEl = $('#r-estado');
+    const boton = form.querySelector('[type="submit"]');
+    const nombre = $('#r-nombre').value.trim();
+    const estrellasNum = Number(new FormData(form).get('r-estrellas'));
+    const texto = $('#r-texto').value.trim();
+    if (form.querySelector('[name="website"]').value) return;
+    if (nombre.length < 2 || nombre.length > 60 || texto.length < 10 || texto.length > 600 || estrellasNum < 1 || estrellasNum > 5) {
+      estadoEl.textContent = 'Verifica el nombre, la calificación y que la reseña tenga entre 10 y 600 caracteres.'; return;
+    }
+    boton.disabled = true; estadoEl.textContent = 'Enviando y validando tu reseña…';
+    try {
+      const respuesta = await fetch('/api/reviews', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ nombre, estrellas: estrellasNum, texto, foto: fotoData || undefined, website: '' })
+      });
+      const datos = await respuesta.json().catch(() => ({}));
+      if (!respuesta.ok) throw new Error(datos.error || (respuesta.status === 429 ? 'Has enviado demasiadas reseñas. Intenta más tarde.' : 'No fue posible enviar la reseña.'));
+      estadoEl.textContent = '¡Gracias! Tu reseña superó las validaciones antispam y ya está publicada para todos los visitantes.';
+      form.reset(); fotoData = ''; $('#r-previa').hidden = true; await cargarResenas();
+    } catch (error) {
+      estadoEl.textContent = `${error.message || 'No se pudo conectar con el servidor.'} Si la web está publicada como sitio estático, debes desplegar también el backend incluido en el proyecto.`;
+    } finally { boton.disabled = false; }
+  });
+}
+
+// El encabezado flota sobre el video y se vuelve sólido al bajar
+function iniciarEncabezado() {
+  const header = $('.header');
+  const marcar = () => header.classList.toggle('header--solido', window.scrollY > 24);
+  window.addEventListener('scroll', marcar, { passive: true });
+  marcar();
+}
+
+// ========================================
+// PESTAÑAS DE COMPRAR / VENDER
 const TABS = ['comprar', 'vender'];
 
 function activarTab(nombre, enfocar = false) {
@@ -235,12 +508,13 @@ function activarTab(nombre, enfocar = false) {
     $(`#panel-${n}`).hidden = !activo;
     if (activo && enfocar) tab.focus();
   });
+  $$('[data-texto]').forEach(el => { el.hidden = el.dataset.texto !== nombre; });
 }
 
 // Lleva a la persona al panel del inicio con la pestaña elegida
 function abrirPanel(nombre) {
   activarTab(nombre);
-  $('#inicio').scrollIntoView({ behavior: comportamiento, block: 'start' });
+  $('#compra-venta').scrollIntoView({ behavior: comportamiento, block: 'start' });
   const primerCampo = $(`#panel-${nombre} select, #panel-${nombre} input`);
   setTimeout(() => primerCampo && primerCampo.focus({ preventScroll: true }), sinMovimiento ? 0 : 450);
 }
@@ -347,9 +621,13 @@ function aplicarConfig() {
 // ========================================
 // INICIALIZACIÓN
 document.addEventListener('DOMContentLoaded', () => {
+  iniciarResenas();
   aplicarConfig();
   crearControles();
   crearTickerMarcas();
+  iniciarHero();
+  iniciarEncabezado();
+  iniciarVisor();
   iniciarTabs();
   iniciarFormularioCompra();
   iniciarFormularioVenta();

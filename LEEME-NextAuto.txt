@@ -1,0 +1,25 @@
+NEXTAUTO - ACTUALIZACION DE FOTOGRAFIAS Y VISOR
+
+CAMBIOS
+- Se añadieron las seis fotografías suministradas, optimizadas en img/autos/.
+- Mercedes-Benz GLC: dos fotografías.
+- Volvo V40: dos fotografías.
+- Volkswagen T-Cross: dos fotografías.
+- Las tarjetas usan la foto principal y permiten abrir el detalle con las dos vistas.
+- En detalle, arrastra horizontalmente o usa las flechas para cambiar de ángulo.
+
+IMPORTANTE SOBRE EL 3D
+El visor actual permite alternar las fotografías y aplica un efecto de perspectiva, pero no es un modelo 3D geométrico real. Para rotación 360 grados real, se necesita un archivo 3D .glb/.gltf de cada modelo (idealmente el mismo año, carrocería y acabado) o una secuencia de muchas fotografías tomadas alrededor del vehículo. No se inventaron modelos 3D ni se reemplazaron las fotos reales.
+
+PUBLICACION
+1. Descomprime este ZIP.
+2. Sube el contenido de NextAuto-main al repositorio GitHub reemplazando los archivos anteriores.
+3. Confirma que img/autos/ se subió completa.
+4. Espera el despliegue de Cloudflare Pages y prueba los botones "Ver detalle".
+
+ACTUALIZACIÓN VISOR 3D
+El detalle del vehículo ahora integra <model-viewer> con controles táctiles y de ratón para rotación real del modelo 3D. Los archivos GLB deben colocarse en la carpeta modelos/ con los nombres indicados en modelos/LEEME-MODELOS-3D.txt. Mientras no se añadan esos modelos, se muestran las fotos reales del inventario como alternativa centrada.
+
+
+CORRECCION VISTA 360° (oct 2026)
+Los .glb eran videos MP4, por eso no se veia nada en 3D. Ahora se usa una vista 360° por fotogramas (modelos/360/). Ver modelos/LEEME-MODELOS-3D.txt.

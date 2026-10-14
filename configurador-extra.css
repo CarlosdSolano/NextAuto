@@ -1,0 +1,200 @@
+/* Ajustes propios de NextAuto. configurador.css se deja intacto; aquí solo va lo que cambia
+   porque las fotos de los carros no son recortes con fondo transparente ni tienen nombres cortos. */
+
+/* Difumina los bordes de la foto para que se funda con el fondo negro */
+.tesla-slide__img-car {
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 52%, transparent 98%);
+          mask-image: radial-gradient(ellipse at center, #000 52%, transparent 98%);
+}
+
+/* Marca + modelo es más largo que "Meridian": la caja del nombre ocupa todo el ancho */
+.tesla-slide-aside__name { width: 100%; }
+
+/* Ventanas bajas: la página deja de bloquear el scroll (ver configurador.js) */
+html.scroll-nativo body { overflow-y: auto; }
+
+/* Mensaje si no cargan las librerías (sin internet) */
+#aviso { position: fixed; inset: 0; display: grid; place-items: center; padding: 2rem; text-align: center; }
+#aviso[hidden] { display: none; }
+
+
+/* Visor interactivo de fotos: efecto de profundidad y navegación entre ángulos reales */
+.visor-auto-3d { width: 100%; max-width: 980px; margin: 0 auto; position: relative; z-index: 2; }
+.visor-auto-3d__escena {
+  min-height: 250px;
+  display: grid;
+  place-items: center;
+  perspective: 1200px;
+  touch-action: pan-y;
+  cursor: grab;
+  user-select: none;
+}
+.visor-auto-3d__escena:active { cursor: grabbing; }
+.visor-auto-3d__foto {
+  max-width: 100%;
+  max-height: min(48vh, 470px);
+  width: 100%;
+  object-fit: contain;
+  transform: rotateY(var(--giro-foto, 0deg));
+  transition: transform .38s ease, opacity .2s ease;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+.visor-auto-3d__controles {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  color: rgba(255,255,255,.86);
+  font: 500 12px/1.4 Arial, sans-serif;
+  letter-spacing: .06em;
+  text-align: center;
+  padding: .35rem 0 .6rem;
+}
+.visor-auto-3d__controles button {
+  border: 1px solid rgba(255,255,255,.55);
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  color: #fff;
+  background: rgba(255,255,255,.08);
+  font: 28px/1 Arial, sans-serif;
+  cursor: pointer;
+}
+.visor-auto-3d__controles button:hover { background: rgba(231,181,60,.25); border-color: #e7b53c; }
+.visor-auto-3d__nota { color: rgba(255,255,255,.65); text-align: center; font: 12px Arial,sans-serif; }
+@media (max-width: 700px) {
+  .visor-auto-3d__escena { min-height: 190px; }
+  .visor-auto-3d__foto { max-height: 32vh; }
+  .visor-auto-3d__controles { gap: .6rem; font-size: 10px; }
+}
+
+/* Visor 3D real con Google model-viewer; conserva una presentación centrada y premium */
+.visor-auto-3d__modelo {
+  width: 100%;
+  height: min(58vh, 590px);
+  min-height: 300px;
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 48%, rgba(255,255,255,.10), rgba(255,255,255,.015) 52%, transparent 76%);
+  border-radius: 18px;
+}
+.visor-auto-3d__modelo model-viewer {
+  display: block;
+  width: 100%;
+  height: 100%;
+  --poster-color: transparent;
+  background: transparent;
+  outline: none;
+}
+.visor-auto-3d__etiqueta {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  padding: 8px 12px;
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 999px;
+  color: rgba(255,255,255,.86);
+  background: rgba(0,0,0,.42);
+  font: 600 10px/1.2 Arial,sans-serif;
+  letter-spacing: .12em;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.visor-auto-3d__ayuda { color: rgba(255,255,255,.7); text-align: center; font: 12px/1.5 Arial,sans-serif; margin: 8px 0; }
+.visor-auto-3d__escena--foto { background: radial-gradient(ellipse at center, rgba(255,255,255,.08), transparent 72%); }
+.visor-auto-3d__foto { display: block; width: 100%; height: min(55vh, 560px); max-height: 560px; object-fit: contain; object-position: center; -webkit-mask-image: none; mask-image: none; transform: none; }
+@media (max-width: 700px) {
+  .visor-auto-3d__modelo { height: 40vh; min-height: 250px; }
+  .visor-auto-3d__foto { height: 36vh; }
+  .visor-auto-3d__etiqueta { font-size: 9px; }
+}
+
+/* Vista 360° por fotogramas */
+.giro360 { width: 100%; }
+.giro360__escena {
+  position: relative;
+  width: 100%;
+  max-width: min(58vh, 590px);
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+  overflow: hidden;
+  border-radius: 18px;
+  background: #0b0b0d;
+  touch-action: pan-y;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  outline: none;
+}
+.giro360__escena:active { cursor: grabbing; }
+.giro360__escena:focus-visible { box-shadow: 0 0 0 2px #e7b53c; }
+.giro360__img { display: block; width: 100%; height: 100%; object-fit: contain; pointer-events: none; -webkit-user-drag: none; }
+.giro360__carga {
+  position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+  padding: 6px 12px; border-radius: 999px; background: rgba(0,0,0,.55);
+  color: #fff; font: 600 11px/1.2 Arial, sans-serif; letter-spacing: .06em; pointer-events: none;
+}
+.giro360__play { font-size: 13px !important; }
+@media (max-width: 700px) { .giro360__escena { max-width: min(40vh, 100%); } }
+
+/* Posición del visor 360° (el contenedor original está pensado para una foto ancha que sale por la derecha) */
+@media only screen and (min-width: 768px) {
+  .tesla-slide__img--giro {
+    overflow: visible;
+    top: 6%;
+    right: 16%;
+    left: auto;
+    width: min(440px, 50vh, 38vw);
+    z-index: 2;
+  }
+  .tesla-slide__img--giro:before { display: none; }
+  .tesla-slide__img--giro .giro360__escena { max-width: 100%; }
+}
+@media only screen and (max-width: 767px) {
+  .tesla-slide__img--giro .giro360__escena { max-width: min(72vw, 38vh); }
+}
+
+/* Anula las reglas de ".tesla-slide__img img" (pensadas para fotos anchas) en el visor 360° */
+.tesla-slide__img .giro360__img {
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  transform: none;
+}
+@media only screen and (min-width: 768px) {
+  .tesla-slide__img--giro { top: -8%; }
+}
+
+/* ===== Vista 360° sin fondo (PNG/WebP con transparencia, sombra y reflejo incluidos) ===== */
+.tesla-slide__img .giro360__escena,
+.tesla-slide__img--giro .giro360__escena {
+  max-width: 100%;
+  width: 100%;
+  aspect-ratio: 800 / 480;
+  background: none;
+  border-radius: 0;
+  overflow: visible;
+}
+.giro360__img { filter: drop-shadow(0 18px 28px rgba(0,0,0,.35)); }
+.giro360__escena .visor-auto-3d__etiqueta { bottom: -6px; opacity: .8; }
+@media only screen and (min-width: 768px) {
+  .tesla-slide__img--giro {
+    top: -2%;
+    right: -3%;
+    width: min(600px, 48vw);
+  }
+}
+@media only screen and (max-width: 767px) {
+  .tesla-slide__img--giro { width: 100%; }
+  .tesla-slide__img--giro .giro360__escena { max-width: 100%; }
+}
+
+.giro360__hint { font: 600 10px/1 Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.7); margin-left: .4rem; }
+
+@media only screen and (max-width: 767px) {
+  .tesla-slide__bckg { opacity: .3; }
+}
